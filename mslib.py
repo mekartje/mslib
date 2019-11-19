@@ -27,7 +27,7 @@ class simulation(object):
         self.samplesize = int(headerline[0].split(' ')[1])
         self.reps = int(headerline[0].split(' ')[2])
         self.theta = float(headerline[1].split(' ')[1])
-    
+
     """
     list of sequences (i.e., seqence length x sample size matrix)
     (don't code adaptive allele any differently
@@ -70,28 +70,28 @@ arguments:
     seqls -- list of sequences as output by SIM_OBJ.replicate(number)
     scope -- 'total' for total nucleotide diversity (default). 'within' for average within populatino nucleotide diversity
     n_pop_1, n_pop_2 -- number of individuals in populations 1 and 2
-    
-    ***Make fast option w/ map/reduce architecture***  
+
+    ***Make fast option w/ map/reduce architecture***
 """
 def get_nuc_divers(seqls, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
     snp_heterozygosity = []
-    snp_id = []  
+    snp_id = []
     #need to convert to float for python 2 compatibility
     n_pop_1 = float(n_pop_1)
     n_pop_2 = float(n_pop_2)
     #iterate through segregating sites
     for snp in range(len(seqls[0])):
-        #snp_id.clear() have to remove clearing step for python 2.6.6 compatibility. make new list instead 
+        #snp_id.clear() have to remove clearing step for python 2.6.6 compatibility. make new list instead
         snp_id = []
         #iterage through samples, appending the current snp to a list
         #need to catch ValueError for letters mixed in w simulated sequence data
         for sample in range(len(seqls)):
-            try:  
-                snp_id.append(float(seqls[sample][snp]))     
-            except ValueError: #for adaptive varaints (encoded by msms as > 1 in some cases for soft sweeps (i.e., when > 1 adaptive variants are present at the onset of selection) 
-                snp_id.append(float(1))      
+            try:
+                snp_id.append(float(seqls[sample][snp]))
+            except ValueError: #for adaptive varaints (encoded by msms as > 1 in some cases for soft sweeps (i.e., when > 1 adaptive variants are present at the onset of selection)
+                snp_id.append(float(1))
         if scope == 'total':
-            #obtain allele frequencies and total heterozygosity         
+            #obtain allele frequencies and total heterozygosity
             p_tot = float(sum(snp_id))/len(snp_id)
             H_tot = (float(len(snp_id))/(float(len(snp_id)) - 1)) * (1 - (float(p_tot)**2 + (1-float(p_tot))**2))
             snp_heterozygosity.append(H_tot)
@@ -108,7 +108,7 @@ def get_nuc_divers(seqls, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
 """
 function returning Watterson's theta for a replicate, rep (not per-site)
 arguments:
-    rep: list of sequenses as output by SIM_OBJ.replicate(number)
+    rep: list of sequences as output by SIM_OBJ.replicate(number)
     sampsize: sample size, as output by SIM_OBJ.samplesize
     segsites: number of segregating sites, as output by SIM_OBJ.segsites
 """
@@ -128,31 +128,31 @@ arguments:
 def get_snp_fst(seqls, n_pop_1, n_pop_2):
     #initialize lists for snp fst results and individual snps
     snp_fst = []
-    snp_id = []  
+    snp_id = []
     #need to convert to float for python 2 compatibility
     n_pop_1 = float(n_pop_1)
     n_pop_2 = float(n_pop_2)
     #iterate through segregating sites
     for snp in range(len(seqls[0])):
-        #snp_id.clear() have to remove clearing step for python 2.6.6 compatibility. make new list instead 
+        #snp_id.clear() have to remove clearing step for python 2.6.6 compatibility. make new list instead
         snp_id = []
         #iterage through samples, appending the current snp to a list
         #need to catch ValueError for letters mixed in w simulated sequence data
         for sample in range(len(seqls)):
-            try:  
-                snp_id.append(float(seqls[sample][snp]))     
-            except ValueError: #for adaptive varaints (encoded by msms as > 1 in some cases for soft sweeps (i.e., when > 1 adaptive variants are present at the onset of selection) 
-                snp_id.append(float(1)) 
+            try:
+                snp_id.append(float(seqls[sample][snp]))
+            except ValueError: #for adaptive varaints (encoded by msms as > 1 in some cases for soft sweeps (i.e., when > 1 adaptive variants are present at the onset of selection)
+                snp_id.append(float(1))
         #omit sites containing at least one 'NA', although this shouldn't be a issue
         if 'NA' in snp_id:
             snp_fst.append('NA')
-            continue   
+            continue
         #omit sites with > 2 alleles
         elif sum(i > 1 for i in snp_id) > 0:
             snp_id.append(float(1))
-            continue    
+            continue
         else:
-            #obtain allele frequencies and within population/total heterozygosity         
+            #obtain allele frequencies and within population/total heterozygosity
             p_tot = float(sum(snp_id))/len(snp_id)
             H_tot = (float(len(snp_id))/(float(len(snp_id)) - 1)) * (1 - (float(p_tot)**2 + (1-float(p_tot))**2))
             p_pop1 = sum(snp_id[:int(n_pop_1)])/n_pop_1
@@ -165,7 +165,7 @@ def get_snp_fst(seqls, n_pop_1, n_pop_2):
                 snp_fst.append((H_tot - H_win)/float(H_tot))
             except ZeroDivisionError:
                 snp_fst.append('NA')
-    #return snp fst list  
+    #return snp fst list
     return(snp_fst)
 
 """
@@ -173,7 +173,7 @@ function returning max snp fst for a replicate (i.e., window)
 arguments:
     rep: list of sequences, as output by SIM_OBJ.replicate(number)
     nx: population size for pop x
-"""   
+"""
 def get_max_snp_fst(rep, n1, n2):
     fst_ls = get_snp_fst(rep, n1, n2)
     return(max(fst_ls))
@@ -185,11 +185,11 @@ given replicate from a simulation object
 arguments:
     rep: list of sequences, as output by SIM_OBJ.replicate(number)
     nx: population size for pop x (number of chromosomes)
-"""                        
+"""
 def get_fst_rep(rep, n1, n2):
-    fst_ls = get_snp_fst(rep, n1, n2)   
+    fst_ls = get_snp_fst(rep, n1, n2)
     return(sum(fst_ls)/len(fst_ls))
-    
+
 """
 function returning Dxy
 arguments:
@@ -204,12 +204,12 @@ def get_dxy(rep, n_pop_1, n_pop_2):
     #choose each pair of sequences
     for i in range(n_pop_1):
         for j in range(n_pop_2):
-            j += n_pop_1 
+            j += n_pop_1
             for site in range(nsites): #will error out if many adaptive alleles of independent origin (NameError)
                 if rep[i][site] != rep[j][site]:
                     diffs += 1
     return(diffs/correction)
-    
+
 """
 function returning Hudson, Slatkin, Madison 'Fst' (1992, i think)
 arguments:
@@ -226,7 +226,7 @@ def get_hsm_fst(rep, n_pop_1, n_pop_2):
 function returning list of site frequencies
 arguments:
     rep: list of sequences as output by SIM_OBJ.replicate(number)
-    allele: 'derived' (default) or 'minor' (i.e., return derived or minor allele frequencies. 
+    allele: 'derived' (default) or 'minor' (i.e., return derived or minor allele frequencies.
 """
 def get_site_freqs(rep, allele = 'derived'):
     site_freq_ls = []
@@ -250,7 +250,7 @@ def get_site_freqs(rep, allele = 'derived'):
 """
 fuction returning genotype frequencies between a pair of sites
 get counts, rather than freqs, for FET implementation
-arguments: 
+arguments:
     rep: list of sequences asoutput by SIM_OBJ.replicate(number)
     posx: snp haplotypes to be counted
 """
@@ -258,20 +258,20 @@ def get_haplo_counts(rep, pos1, pos2): #positions are 0-based
     haplo_dict = {'anc1_anc2':0, 'anc1_der2':0, 'der1_anc2':0, 'der1_der2':0}
     for samp in range(len(rep)):
         if (int(rep[samp][pos1]) + int(rep[samp][pos2])) == 0:
-            haplo_dict['anc1_anc2'] += 1   
+            haplo_dict['anc1_anc2'] += 1
         elif (int(rep[samp][pos1]) + int(rep[samp][pos2])) == 1:
             if int(rep[samp][pos1]) == 1:
-                haplo_dict['der1_anc2'] += 1     
+                haplo_dict['der1_anc2'] += 1
             else:
-                haplo_dict['anc1_der2'] += 1   
+                haplo_dict['anc1_der2'] += 1
         elif (int(rep[samp][pos1]) + int(rep[samp][pos2])) == 2:
             haplo_dict['der1_der2'] += 1
     return(haplo_dict)
-    
+
 """
 function returning D given haplotype counts output by get_haplo_counts, list of site frequencies, and positions of sites
 assumes derived allele frequencies (i.e., unfolded SFS)
-arguments: 
+arguments:
     haplo_count_dict: dictionary output by the get_haplo_counts() function
     site_freq_ls: list of site frequenies output by get_site_freqs() function
     posx: positions between which D will be computed
@@ -286,7 +286,7 @@ def get_D(haplo_count_dict, site_freq_ls, pos1, pos2):
 function returning dictionary of r2 for a replicate
 option to print dictionary to STDOUT
 #use del rather than .remove(), remove returns nothing (i.e., 'NoneType'), and will remove the first value equivalent to the input value (i.e., not necessarily the same position as the reference list)
-#some r2 >>1 
+#some r2 >>1
 #can make this a hell of a lot faster by just computing correlation coef for discrete data (i.e., cov/sqrt(blah)) and squaring. maybe.
 arguments:
     rep: list of sequences as output by SIM_OBJ.replicate(number)
@@ -304,21 +304,21 @@ def get_r2(rep):
                 r2 = D**2/(site_freq_ls[i]*site_freq_ls[j]*(1 - site_freq_ls[i])*(1 - site_freq_ls[j]))
                 r2_dict[(str(i),str(j))] = r2
     return(r2_dict)
-    
+
 """
 function returning Kelly's Zns (avg r2)
 arguments:
     rep: list of sequences, as output by SIM_OBJ.repliate(number)
-"""       
+"""
 def Zns(rep):
     r2_dict = get_r2(rep)
     Zns = sum(r2_dict.values())/len(r2_dict)
     return(Zns)
-    
+
 """
 distance matrix for all unique sequences in pooled sample
 now, uses Euclidean dist. Modify to take other distance metrics (dictionary w/ sequence pairs as keys, dists as values)
-arguments: 
+arguments:
     rep: list ofsequences, as output by SIM_OBJ.replicate(number)
 """
 def dist_matrix(rep):
@@ -338,7 +338,7 @@ def dist_matrix(rep):
                     if i[snp] != j[snp]:
                         dist_dict[(i,j)] += 1
     return(dist_dict)
-    
+
 """
 sequence frequencies
 returns dictionary with sequences as keys, their frequencies as values
@@ -347,7 +347,7 @@ arguments:
     scope: 'total' for pooled population sequence frequencies (default); 'within' for within-population sequence frequences.
         'within' option returns dict with 2 nested pop-specific dictionaries
     n_pop_x: population sizes for population x
-"""    
+"""
 def seq_freqs(rep, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
     seq_freq_dict = {}
     if scope == 'total':
@@ -360,7 +360,7 @@ def seq_freqs(rep, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
                     if seq == unique_seq:
                         seq_freq_dict[unique_seq] += 1
         for k,v in seq_freq_dict.items():
-            seq_freq_dict[k] = float(v) / len(rep)  
+            seq_freq_dict[k] = float(v) / len(rep)
     elif scope == 'within':
         seq_freq_dict['pop_1'] = {}
         seq_freq_dict['pop_2'] = {}
@@ -389,11 +389,18 @@ def seq_freqs(rep, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
     return(seq_freq_dict)
 
 """
+number of unique haplotypes
+returns the number of unique haplotypes in a dictionary output by seq_freqs
+"""
+def num_unique_haplo(seq_freq_dict):
+    return(len(seq_freq_dict))
+
+"""
 average number of differences between sequences in a sample (total or between population)
 if total is passed, give total seq freqs, if 'within', give pop specific
-arguments: 
-    dist_matrix: dictionary of distances between unique sequences, as output by the function dist_matrix(). 
-    seq_freq_dict: dictionary of sequence frequencies, as output by the function seq_freqs(). 
+arguments:
+    dist_matrix: dictionary of distances between unique sequences, as output by the function dist_matrix().
+    seq_freq_dict: dictionary of sequence frequencies, as output by the function seq_freqs().
         total or within, corresponding to option passed for 'scope' argument.
     scope: 'total' for delta computed from pooled data (default). 'within' to compute average within-population delta.
 """
@@ -419,8 +426,8 @@ def get_delta(dist_matrix, seq_freq_dict, scope = 'total'):
     return(diffs)
 
 """
-'phi_st' 
-arguments: 
+'phi_st'
+arguments:
     rep: list of sequences, as output by SIM_OBJ.replicate(number)
     n_pop_x: population size for population x
 """
@@ -432,7 +439,7 @@ def get_phist(rep, n_pop_1, n_pop_2):
     win_delta = get_delta(dist_mat, pop_freqs, scope = 'within')
     phist = (tot_delta - win_delta) / tot_delta
     return(phist)
-    
+
 """
 Tajima's D
 #can pull sampsize and segsites from SIM_OBJ
@@ -448,7 +455,7 @@ def get_tajima_d(rep, segsites, sampsize):
         #standardization -- from Tajima (1989)
         n = sampsize
         S = segsites
-        a1 = 0 
+        a1 = 0
         for i in range(n - 1):
             i = i + 1
             a1 += 1 / i
@@ -465,7 +472,7 @@ def get_tajima_d(rep, segsites, sampsize):
         var_d = (e1 * S + e2 * S * (S - 1)) ** 1/2
         taj_d = d / var_d
         return(d)
-        
+
 """
 Future modules:
     Fay and Wu's H
