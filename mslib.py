@@ -1,5 +1,4 @@
-import sys, math
-
+import sys, math, statistics
 """
 Parses msms output
 """
@@ -306,6 +305,17 @@ def get_r2(rep):
     return(r2_dict)
 
 """
+function return r2 mean and variance across all pairs of variant sites
+returns a dictionary {'mean': , 'var': }
+"""
+def get_r2_meanVar(rep):
+    out_dict = {}
+    r2_dict = get_r2(rep)
+    out_dict['mean'] = statistics.mean(r2_dict.values())
+    out_dict['var'] = statistics.variance(r2_dict.values())
+    return(out_dict)
+
+"""
 function returning Kelly's Zns (avg r2)
 arguments:
     rep: list of sequences, as output by SIM_OBJ.repliate(number)
@@ -390,10 +400,10 @@ def seq_freqs(rep, scope = 'total', n_pop_1 = 0, n_pop_2 = 0):
 
 """
 number of unique haplotypes
-returns the number of unique haplotypes in a dictionary output by seq_freqs
+returns the number of unique haplotypes in a dictionary output by seq_freqs -- only set up for single population
 """
-def num_unique_haplo(seq_freq_dict):
-    return(len(seq_freq_dict))
+def num_unique_haplo(rep):
+    return(len(seq_freqs(rep)))
 
 """
 average number of differences between sequences in a sample (total or between population)
